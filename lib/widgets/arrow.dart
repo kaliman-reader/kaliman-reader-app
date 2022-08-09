@@ -25,7 +25,7 @@ class Arrow extends StatelessWidget {
             : Icons.navigate_next),
         color: Colors.orange.shade700,
         iconSize: 24.0,
-        onPressed: onPressed,
+        onPressed: enabled ? onPressed : null,
       ),
     );
   }
