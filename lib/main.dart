@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kaliman_reader_app/pages/reader_page.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
 import 'package:kaliman_reader_app/widgets/story.dart';
@@ -6,6 +7,8 @@ import 'package:kaliman_reader_app/widgets/story.dart';
 import 'models/prefix.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  final initFuture = MobileAds.instance.initialize();
   runApp(const MyApp());
 }
 
