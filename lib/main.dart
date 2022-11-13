@@ -1,5 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:kaliman_reader_app/pages/reader_page.dart';
+import 'package:kaliman_reader_app/pages/subfolder.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
 import 'package:kaliman_reader_app/widgets/story.dart';
 
@@ -34,25 +36,39 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String prefix = '';
   List<Prefix> firstLevelPrefixes = [];
+
+  var _loading = false;
 
   @override
   void initState() {
-    getPrefixes();
+    getPrefixes(Prefix(prefix: ""));
     super.initState();
   }
 
-  Future<void> getPrefixes() async {
-    var prefixes = await PrefixRepository.getPrefixes(prefix);
+  setLoading(bool loading) {
     setState(() {
-      firstLevelPrefixes = prefixes;
+      _loading = loading;
     });
   }
 
-  void goToReaderPage(context, prefix) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => ReaderPage(prefix: prefix)));
+  Future<void> getPrefixes(Prefix prefix) async {
+    try {
+      var prefixes = await PrefixRepository.getPrefixes(prefix.prefix);
+      setState(() {
+        firstLevelPrefixes = prefixes;
+      });
+    } catch (exception) {
+      log(exception.toString(),
+          name: 'app.openlinks.kaliman.prefixes', error: exception);
+    }
+  }
+
+  void goToSubFolderPage(List<Prefix> prefixes) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => SubFolderPage(prefixes: prefixes)));
   }
 
   @override
@@ -62,24 +78,40 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Historias de Kaliman'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: firstLevelPrefixes.map((e) {
-            return Story(
-                title: e.prefix,
-                onTap: () {
-                  if (prefix.isEmpty) {
-                    setState(() {
-                      prefix = e.prefix;
-                      getPrefixes();
-                    });
-                  } else {
-                    goToReaderPage(context, e.prefix);
-                  }
-                });
-          }).toList(),
-        ),
-      ),
+          padding: const EdgeInsets.all(16.0),
+          child: Stack(
+            children: [
+              Center(
+                  child: SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child:
+                    _loading == true ? const CircularProgressIndicator() : null,
+              )),
+              ListView(
+                children: firstLevelPrefixes.map((e) {
+                  return Story(
+                      title: e.prefix,
+                      onTap: () async {
+                        setLoading(true);
+                        try {
+                          var prefixes =
+                              await PrefixRepository.getPrefixes(e.prefix);
+                          goToSubFolderPage(prefixes);
+                        } catch (err) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                '¡Pronto tendremos más novedades para ti!'),
+                          ));
+                        } finally {
+                          setLoading(false);
+                        }
+                      });
+                }).toList(),
+              ),
+            ],
+          )),
     );
   }
 }
