@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/reader_page.dart';

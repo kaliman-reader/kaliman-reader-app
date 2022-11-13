@@ -38,10 +38,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Prefix> firstLevelPrefixes = [];
 
+  var _loading = false;
+
   @override
   void initState() {
     getPrefixes(Prefix(prefix: ""));
     super.initState();
+  }
+
+  setLoading(bool loading) {
+    setState(() {
+      _loading = loading;
+    });
   }
 
   Future<void> getPrefixes(Prefix prefix) async {
@@ -70,24 +78,40 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Historias de Kaliman'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: firstLevelPrefixes.map((e) {
-            return Story(
-                title: e.prefix,
-                onTap: () async {
-                  try {
-                    var prefixes = await PrefixRepository.getPrefixes(e.prefix);
-                    goToSubFolderPage(prefixes);
-                  } catch (err) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('¡Pronto tendremos más novedades para ti!'),
-                    ));
-                  }
-                });
-          }).toList(),
-        ),
-      ),
+          padding: const EdgeInsets.all(16.0),
+          child: Stack(
+            children: [
+              Center(
+                  child: SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child:
+                    _loading == true ? const CircularProgressIndicator() : null,
+              )),
+              ListView(
+                children: firstLevelPrefixes.map((e) {
+                  return Story(
+                      title: e.prefix,
+                      onTap: () async {
+                        setLoading(true);
+                        try {
+                          var prefixes =
+                              await PrefixRepository.getPrefixes(e.prefix);
+                          goToSubFolderPage(prefixes);
+                        } catch (err) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                '¡Pronto tendremos más novedades para ti!'),
+                          ));
+                        } finally {
+                          setLoading(false);
+                        }
+                      });
+                }).toList(),
+              ),
+            ],
+          )),
     );
   }
 }

@@ -19,6 +19,13 @@ class ReaderPage extends StatefulWidget {
 class _ReaderPageState extends State<ReaderPage> {
   String? currentPictureUrl;
   List<PictureKey> pictureKeys = [];
+  bool _loading = true;
+
+  setLoading(bool loading) {
+    setState(() {
+      _loading = loading;
+    });
+  }
 
   @override
   void initState() {
@@ -32,21 +39,24 @@ class _ReaderPageState extends State<ReaderPage> {
     setState(() {
       pictureKeys = PictureKeySorter.sort(pictureKeys);
     });
+    setLoading(false);
   }
 
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    if (pictureKeys.length > 5) {
-      for (var i = 0; i < 5; i++) {
-        precacheImage(PictureKeyImage(pictureKeys[i].key), context);
-      }
-    }
     return Scaffold(
-      body: PhotoViewGallery.builder(
+        body: Stack(children: [
+      Center(
+          child: SizedBox(
+        width: 20.0,
+        height: 20.0,
+        child: _loading == true ? const CircularProgressIndicator() : null,
+      )),
+      PhotoViewGallery.builder(
         scrollPhysics: const BouncingScrollPhysics(),
         builder: (BuildContext context, int index) {
-          if (index > 5 && index + 1 < pictureKeys.length) {
+          if (index + 1 < pictureKeys.length) {
             precacheImage(PictureKeyImage(pictureKeys[index + 1].key), context);
           }
           return PhotoViewGalleryPageOptions(
@@ -68,10 +78,7 @@ class _ReaderPageState extends State<ReaderPage> {
             ),
           ),
         ),
-        onPageChanged: (index) {
-          log('khe', level: 50);
-        },
       ),
-    );
+    ]));
   }
 }
