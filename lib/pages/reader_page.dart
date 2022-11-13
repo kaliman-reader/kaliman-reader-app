@@ -29,7 +29,6 @@ class _ReaderPageState extends State<ReaderPage> {
 
   getObjectKeys() async {
     pictureKeys = await ObjectKeyRepository.getKeys(widget.prefix);
-    pictureKeys.removeAt(0);
     setState(() {
       pictureKeys = PictureKeySorter.sort(pictureKeys);
     });
@@ -38,16 +37,13 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.prefix),
-      ),
       body: PhotoViewGallery.builder(
         scrollPhysics: const BouncingScrollPhysics(),
         builder: (BuildContext context, int index) {
           log(index.toString(), level: 1);
           return PhotoViewGalleryPageOptions(
             imageProvider: PictureKeyImage(pictureKeys[index].key),
-            initialScale: PhotoViewComputedScale.contained * 0.8,
+            initialScale: PhotoViewComputedScale.contained,
             heroAttributes:
                 PhotoViewHeroAttributes(tag: pictureKeys[index].key),
           );
