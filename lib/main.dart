@@ -1,14 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:kaliman_reader_app/pages/reader_page.dart';
+import 'package:kaliman_reader_app/pages/subfolder.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
 import 'package:kaliman_reader_app/widgets/story.dart';
 
 import 'models/prefix.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  final initFuture = MobileAds.instance.initialize();
   runApp(const MyApp());
 }
 
@@ -37,25 +36,31 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String prefix = '';
   List<Prefix> firstLevelPrefixes = [];
 
   @override
   void initState() {
-    getPrefixes();
+    getPrefixes(Prefix(prefix: ""));
     super.initState();
   }
 
-  Future<void> getPrefixes() async {
-    var prefixes = await PrefixRepository.getPrefixes(prefix);
-    setState(() {
-      firstLevelPrefixes = prefixes;
-    });
+  Future<void> getPrefixes(Prefix prefix) async {
+    try {
+      var prefixes = await PrefixRepository.getPrefixes(prefix.prefix);
+      setState(() {
+        firstLevelPrefixes = prefixes;
+      });
+    } catch (exception) {
+      log(exception.toString(),
+          name: 'app.openlinks.kaliman.prefixes', error: exception);
+    }
   }
 
-  void goToReaderPage(context, prefix) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => ReaderPage(prefix: prefix)));
+  void goToSubFolderPage(List<Prefix> prefixes) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => SubFolderPage(prefixes: prefixes)));
   }
 
   @override
@@ -70,14 +75,14 @@ class _MyHomePageState extends State<MyHomePage> {
           children: firstLevelPrefixes.map((e) {
             return Story(
                 title: e.prefix,
-                onTap: () {
-                  if (prefix.isEmpty) {
-                    setState(() {
-                      prefix = e.prefix;
-                      getPrefixes();
-                    });
-                  } else {
-                    goToReaderPage(context, e.prefix);
+                onTap: () async {
+                  try {
+                    var prefixes = await PrefixRepository.getPrefixes(e.prefix);
+                    goToSubFolderPage(prefixes);
+                  } catch (err) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('¡Pronto tendremos más novedades para ti!'),
+                    ));
                   }
                 });
           }).toList(),

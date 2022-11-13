@@ -1,12 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kaliman_reader_app/providers/picture_key_image.dart';
 import 'package:kaliman_reader_app/repositories/object_key_repository.dart';
 import 'package:kaliman_reader_app/models/picture_key.dart';
-import 'package:kaliman_reader_app/repositories/object_repository.dart';
 import 'package:kaliman_reader_app/services/picture_sorter.dart';
-import 'package:kaliman_reader_app/widgets/arrow.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
@@ -37,14 +36,19 @@ class _ReaderPageState extends State<ReaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    if (pictureKeys.length > 5) {
+      for (var i = 0; i < 5; i++) {
+        precacheImage(PictureKeyImage(pictureKeys[i].key), context);
+      }
+    }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.prefix),
-      ),
       body: PhotoViewGallery.builder(
         scrollPhysics: const BouncingScrollPhysics(),
         builder: (BuildContext context, int index) {
-          log(index.toString(), level: 1);
+          if (index > 5 && index + 1 < pictureKeys.length) {
+            precacheImage(PictureKeyImage(pictureKeys[index + 1].key), context);
+          }
           return PhotoViewGalleryPageOptions(
             imageProvider: PictureKeyImage(pictureKeys[index].key),
             initialScale: PhotoViewComputedScale.contained * 0.8,
