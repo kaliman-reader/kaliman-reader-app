@@ -19,12 +19,12 @@ if (flutterRoot == null) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
+    flutterVersionCode = 2
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
+    flutterVersionName = '1.1.0'
 }
 
 apply plugin: 'com.android.application'
@@ -50,8 +50,6 @@ android {
 
     defaultConfig {
         applicationId "app.openlinks.kaliman_reader_app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 24
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
