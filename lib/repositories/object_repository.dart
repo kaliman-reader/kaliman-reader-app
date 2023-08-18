@@ -6,8 +6,8 @@ import 'package:kaliman_reader_app/models/object.dart';
 
 class ObjectRepository {
   static Future<Object> getObject(String key) async {
-    http.Response response =
-        await http.get(Uri.parse('$apiUrl/objects/?key=$key'));
+    final String url = '$apiUrl/objects/?key=$key';
+    http.Response response = await http.get(Uri.parse(url));
     Map<String, dynamic> json = jsonDecode(response.body);
     return Object.fromJson(json);
   }
