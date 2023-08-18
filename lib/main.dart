@@ -1,13 +1,15 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kaliman_reader_app/pages/subfolder.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
 import 'package:kaliman_reader_app/widgets/story.dart';
 
 import 'models/prefix.dart';
 
-void main() {
+Future main() async {
+  await dotenv.load();
   runApp(const MyApp());
 }
 
