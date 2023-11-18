@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kaliman_reader_app/repositories/object_repository.dart';
 
 class PictureKeyImage extends ImageProvider<PictureKeyImage> {
@@ -25,7 +25,8 @@ class PictureKeyImage extends ImageProvider<PictureKeyImage> {
   }
 
   @override
-  ImageStreamCompleter load(PictureKeyImage key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      PictureKeyImage key, ImageDecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -59,7 +60,7 @@ class PictureKeyImage extends ImageProvider<PictureKeyImage> {
   Future<ui.Codec> _loadAsync(
     PictureKeyImage key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) async {
     try {
       assert(key == this);
@@ -94,7 +95,7 @@ class PictureKeyImage extends ImageProvider<PictureKeyImage> {
         throw Exception('PictureKeyImage is an empty file: $resolved');
       }
 
-      return decode(bytes);
+      return decode(await ImmutableBuffer.fromUint8List(bytes));
     } catch (e) {
       // Depending on where the exception was thrown, the image cache may not
       // have had a chance to track the key in the cache at all.
