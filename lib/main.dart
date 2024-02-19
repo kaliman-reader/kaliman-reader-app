@@ -93,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ListView(
                 children: firstLevelPrefixes.map((e) {
                   return Story(
-                      title: e.prefix,
+                      title: e.prefix.replaceAll(RegExp(r'\/'), ''),
                       onTap: () async {
                         setLoading(true);
                         try {
