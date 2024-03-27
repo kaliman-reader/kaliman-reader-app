@@ -28,11 +28,14 @@ class _SubFolderPageState extends State<SubFolderPage> {
         child: ListView(
           children: widget.prefixes.map((e) {
             return Story(
-                title: e.prefix.replaceAllMapped(
-                    RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})'),
-                onTap: () {
-                  goToReaderPage(context, e.prefix);
-                });
+              title: e.prefix.replaceAllMapped(
+                  RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})'),
+              onTap: () {
+                goToReaderPage(context, e.prefix);
+              },
+              prefix: e.prefix,
+              isFinalFolder: true,
+            );
           }).toList(),
         ),
       ),
