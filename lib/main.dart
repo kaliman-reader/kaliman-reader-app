@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/pages/subfolder.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
 import 'package:kaliman_reader_app/widgets/story.dart';
@@ -22,9 +23,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lector de Kaliman',
       theme: ThemeData(
-        primarySwatch: Colors.orange,
-      ),
+          primarySwatch: Colors.orange, splashFactory: InkRipple.splashFactory),
       home: const MyHomePage(title: 'Lector de Kaliman'),
+      scaffoldMessengerKey: scaffoldMessengerKey,
     );
   }
 }
@@ -94,6 +95,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: firstLevelPrefixes.map((e) {
                   return Story(
                       title: e.prefix.replaceAll(RegExp(r'\/'), ''),
+                      prefix: e.prefix,
+                      isFinalFolder: false,
                       onTap: () async {
                         setLoading(true);
                         try {
@@ -101,8 +104,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               await PrefixRepository.getPrefixes(e.prefix);
                           goToSubFolderPage(prefixes);
                         } catch (err) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
+                          var state = scaffoldMessengerKey.currentState;
+                          state?.showSnackBar(const SnackBar(
                             content: Text(
                                 '¡Pronto tendremos más novedades para ti!'),
                           ));
