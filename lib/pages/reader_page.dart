@@ -9,7 +9,7 @@ import 'package:photo_view/photo_view_gallery.dart';
 
 class ReaderPage extends StatefulWidget {
   final String prefix;
-  const ReaderPage({Key? key, required this.prefix}) : super(key: key);
+  const ReaderPage({super.key, required this.prefix});
   @override
   State<StatefulWidget> createState() => _ReaderPageState();
 }
@@ -49,39 +49,43 @@ class _ReaderPageState extends State<ReaderPage> {
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     return Scaffold(
+        appBar: AppBar(),
         body: Stack(children: [
-      Center(
-          child: SizedBox(
-        width: 20.0,
-        height: 20.0,
-        child: _loading == true ? const CircularProgressIndicator() : null,
-      )),
-      PhotoViewGallery.builder(
-        scrollPhysics: const BouncingScrollPhysics(),
-        builder: (BuildContext context, int index) {
-          if (index + 1 < pictureKeys.length) {
-            precacheImage(PictureKeyImage(pictureKeys[index + 1].key), context);
-          }
-          return PhotoViewGalleryPageOptions(
-            imageProvider: PictureKeyImage(pictureKeys[index].key),
-            initialScale: PhotoViewComputedScale.contained,
-            heroAttributes:
-                PhotoViewHeroAttributes(tag: pictureKeys[index].key),
-          );
-        },
-        itemCount: pictureKeys.length,
-        loadingBuilder: (context, event) => Center(
-          child: SizedBox(
-            width: 20.0,
-            height: 20.0,
-            child: CircularProgressIndicator(
-              value: event == null
-                  ? 0
-                  : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
+          Center(
+            child: SizedBox(
+              width: 20.0,
+              height: 20.0,
+              child:
+                  _loading == true ? const CircularProgressIndicator() : null,
             ),
           ),
-        ),
-      ),
-    ]));
+          PhotoViewGallery.builder(
+            scrollPhysics: const BouncingScrollPhysics(),
+            builder: (BuildContext context, int index) {
+              if (index + 1 < pictureKeys.length) {
+                precacheImage(
+                    PictureKeyImage(pictureKeys[index + 1].key), context);
+              }
+              return PhotoViewGalleryPageOptions(
+                imageProvider: PictureKeyImage(pictureKeys[index].key),
+                initialScale: PhotoViewComputedScale.contained,
+                heroAttributes:
+                    PhotoViewHeroAttributes(tag: pictureKeys[index].key),
+              );
+            },
+            itemCount: pictureKeys.length,
+            loadingBuilder: (context, event) => Center(
+              child: SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child: CircularProgressIndicator(
+                  value: event == null
+                      ? 0
+                      : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
+                ),
+              ),
+            ),
+          ),
+        ]));
   }
 }

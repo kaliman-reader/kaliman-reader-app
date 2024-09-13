@@ -6,7 +6,7 @@ import '../widgets/story.dart';
 
 class SubFolderPage extends StatefulWidget {
   final List<Prefix> prefixes;
-  const SubFolderPage({Key? key, required this.prefixes}) : super(key: key);
+  const SubFolderPage({super.key, required this.prefixes});
   @override
   State<StatefulWidget> createState() => _SubFolderPageState();
 }
