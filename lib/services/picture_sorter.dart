@@ -4,9 +4,9 @@ class PictureWithLastKey extends PictureKey {
   final String lastKey;
   PictureWithLastKey({
     required this.lastKey,
-    required key,
-    required size,
-  }) : super(key: key, size: size);
+    required super.key,
+    required super.size,
+  });
 }
 
 class PictureKeySorter {
