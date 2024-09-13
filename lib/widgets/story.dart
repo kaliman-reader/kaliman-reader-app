@@ -8,12 +8,11 @@ class Story extends StatelessWidget {
   final bool isFinalFolder;
 
   const Story(
-      {Key? key,
+      {super.key,
       required this.title,
       this.onTap,
       required this.prefix,
-      required this.isFinalFolder})
-      : super(key: key);
+      required this.isFinalFolder});
 
   @override
   Widget build(BuildContext context) {

@@ -8,11 +8,11 @@ class Arrow extends StatelessWidget {
   final bool enabled;
 
   const Arrow({
-    Key? key,
+    super.key,
     required this.direction,
     required this.onPressed,
     required this.enabled,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
