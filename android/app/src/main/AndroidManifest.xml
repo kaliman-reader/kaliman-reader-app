@@ -8,6 +8,9 @@
         android:label="Lector de Kaliman"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6110719785370031~2286894904" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
