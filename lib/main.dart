@@ -6,7 +6,9 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/pages/subfolder.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
+import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:kaliman_reader_app/widgets/grid_story.dart';
+import 'package:kaliman_reader_app/widgets/the-app-drawer.dart';
 
 import 'models/prefix.dart';
 
@@ -25,8 +27,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Lector de Kaliman',
-      theme: ThemeData(
-          primarySwatch: Colors.orange, splashFactory: InkRipple.splashFactory),
+      themeMode: ThemeMode.system,
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.light(primary: Color(Colors.orange.value)),
+      ),
+      darkTheme: ThemeData.from(
+        colorScheme: ColorScheme.dark(primary: Color(Colors.deepOrange.value)),
+      ),
       home: const MyHomePage(title: 'Lector de Kaliman'),
       scaffoldMessengerKey: scaffoldMessengerKey,
     );
@@ -45,11 +52,6 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Prefix> firstLevelPrefixes = [];
 
   var _loading = false;
-
-  BannerAd? _bannerAd;
-  bool _isBannerLoaded = false;
-
-  final String _adUnitId = dotenv.get('AD_BANNER_UNIT_ID');
 
   @override
   void initState() {
@@ -84,8 +86,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    _loadAd();
     return Scaffold(
+      drawer: const TheAppDrawer(),
       appBar: AppBar(
         title: const Text('Aventuras de Kaliman'),
       ),
@@ -126,59 +128,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           }
                         });
                   }).toList()),
-              if (_bannerAd != null && _isBannerLoaded)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SafeArea(
-                    child: Ink(
-                      color: Color(Colors.white.value),
-                      child: SizedBox(
-                        width: _bannerAd!.size.width.toDouble(),
-                        height: _bannerAd!.size.height.toDouble(),
-                        child: AdWidget(ad: _bannerAd!),
-                      ),
-                    ),
-                  ),
-                ),
+              const AdBanner(),
             ],
           )),
     );
-  }
-
-  void _loadAd() async {
-    if (!mounted) {
-      return;
-    }
-
-    // Get an AnchoredAdaptiveBannerAdSize before loading the ad.
-    const size = AdSize.banner;
-
-    BannerAd(
-      adUnitId: _adUnitId,
-      request: const AdRequest(),
-      size: size,
-      listener: BannerAdListener(
-        // Called when an ad is successfully received.
-        onAdLoaded: (ad) {
-          setState(() {
-            _bannerAd = ad as BannerAd;
-            _isBannerLoaded = true;
-          });
-        },
-        // Called when an ad request failed.
-        onAdFailedToLoad: (ad, err) {
-          log('Ad failed to load: $err');
-          ad.dispose();
-        },
-        // Called when an ad opens an overlay that covers the screen.
-        onAdOpened: (Ad ad) {
-          log('Ad opened.');
-        },
-        // Called when an ad removes an overlay that covers the screen.
-        onAdClosed: (Ad ad) {},
-        // Called when an impression occurs on the ad.
-        onAdImpression: (Ad ad) {},
-      ),
-    ).load();
   }
 }
