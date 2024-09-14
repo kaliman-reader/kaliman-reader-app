@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/reader_page.dart';
+import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 
 import '../widgets/story.dart';
 
@@ -20,25 +21,29 @@ class _SubFolderPageState extends State<SubFolderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Capítulos"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: widget.prefixes.map((e) {
-            return Story(
-              title: e.prefix.replaceAllMapped(
-                  RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})'),
-              onTap: () {
-                goToReaderPage(context, e.prefix);
-              },
-              prefix: e.prefix,
-              isFinalFolder: true,
-            );
-          }).toList(),
+        appBar: AppBar(
+          title: const Text("Capítulos"),
         ),
-      ),
-    );
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView(
+                children: widget.prefixes.map((e) {
+                  return Story(
+                    title: e.prefix.replaceAllMapped(
+                        RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})'),
+                    onTap: () {
+                      goToReaderPage(context, e.prefix);
+                    },
+                    prefix: e.prefix,
+                    isFinalFolder: true,
+                  );
+                }).toList(),
+              ),
+            ),
+            const AdBanner(),
+          ],
+        ));
   }
 }
