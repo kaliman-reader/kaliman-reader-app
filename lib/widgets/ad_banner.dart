@@ -19,7 +19,6 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
-    _loadAd();
     if (_bannerAd != null && _isBannerLoaded) {
       return Align(
         alignment: Alignment.bottomCenter,
@@ -42,8 +41,15 @@ class _AdBannerState extends State<AdBanner> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
   void _loadAd() async {
     if (!mounted) {
+      log('Called to load but not mounted.');
       return;
     }
 
