@@ -1,4 +1,9 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
+import 'package:kaliman_reader_app/common/constants.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TheAppDrawer extends StatelessWidget {
   const TheAppDrawer({super.key});
@@ -20,22 +25,36 @@ class TheAppDrawer extends StatelessWidget {
                 child: Image.asset('assets/kaliman-cover.jpg'),
               )),
           ListTile(
-            onTap: () {},
+            onTap: () {
+              FirebaseAnalytics.instance
+                  .logEvent(name: 'view_app_listing', parameters: {
+                'app_id': playStoreUrl,
+              });
+              InAppReview.instance.openStoreListing();
+            },
             leading: Icon(Icons.star,
                 color: Color(Theme.of(context).colorScheme.primary.value)),
             title: const Text('Danos amor'),
           ),
           ListTile(
-            onTap: () {
-              Navigator.pop(context);
+            onTap: () async {
+              FirebaseAnalytics.instance.logShare(
+                  contentType: 'url', itemId: playStoreUrl, method: 'share');
+              await Share.share(
+                '¡Hola! Te invito a descargar el Lector de Kaliman donde podrás leer todas las aventuras. ¡Es gratis! $playStoreUrl',
+              );
             },
             leading: Icon(Icons.share,
                 color: Color(Theme.of(context).colorScheme.primary.value)),
             title: const Text('Comparte con tus amigos'),
           ),
           ListTile(
-            onTap: () {
-              Navigator.pop(context);
+            onTap: () async {
+              FirebaseAnalytics.instance
+                  .logEvent(name: 'view_url', parameters: {
+                'url': facebookGroupUrl,
+              });
+              await launchUrl(Uri.parse(facebookGroupUrl));
             },
             leading: Icon(Icons.facebook_outlined,
                 color: Color(Theme.of(context).colorScheme.primary.value)),
