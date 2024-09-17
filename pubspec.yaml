@@ -39,7 +39,10 @@ dependencies:
   google_mobile_ads: ^4.0.0
   path_provider: ^2.1.4
   share_plus: ^10.0.2
-  share_plus_platform_interface: ^5.0.0
+  url_launcher: ^6.3.0
+  in_app_review: ^2.0.9
+  firebase_analytics: ^11.3.1
+  firebase_core: ^3.4.1
 
 dev_dependencies:
   test:
