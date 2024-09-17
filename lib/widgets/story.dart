@@ -18,7 +18,15 @@ class Story extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(title),
-      leading: Image(image: LeadingImage(prefix, isFinalFolder: isFinalFolder)),
+      leading: Image(
+        image: ResizeImage(
+          LeadingImage(
+            prefix,
+            isFinalFolder: isFinalFolder,
+          ),
+          width: 40,
+        ),
+      ),
       onTap: onTap,
     );
   }
