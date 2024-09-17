@@ -25,9 +25,12 @@ class GridStory extends StatelessWidget {
           children: [
             Expanded(
               child: Image(
-                image: LeadingImage(
-                  prefix,
-                  isFinalFolder: isFinalFolder,
+                image: ResizeImage(
+                  LeadingImage(
+                    prefix,
+                    isFinalFolder: isFinalFolder,
+                  ),
+                  width: 120,
                 ),
               ),
             ),
