@@ -1,5 +1,10 @@
+import 'dart:developer';
+
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/models/picture_key.dart';
 import 'package:kaliman_reader_app/providers/picture_key_image.dart';
@@ -25,6 +30,10 @@ class _ReaderPageState extends State<ReaderPage> {
   bool _showAppBar = false;
   var downloadIcon = Icons.download;
 
+  bool _isAdLoaded = false;
+  InterstitialAd? _interstitialAd;
+  final String adUnitId = dotenv.get('AD_INTERSTITIAL_UNIT_ID');
+
   setLoading(bool loading) {
     setState(() {
       _loading = loading;
@@ -34,6 +43,12 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   void initState() {
     getObjectKeys();
+    _loadAd();
+    FirebaseAnalytics.instance.logScreenView(
+      screenName: 'reader_page',
+      screenClass: 'ReaderPage',
+      parameters: {'prefix': widget.prefix},
+    );
     super.initState();
   }
 
@@ -85,8 +100,9 @@ class _ReaderPageState extends State<ReaderPage> {
               ],
             )
           : null,
-      body: GestureDetector(
-        onTap: () => setState(() => _showAppBar = !_showAppBar),
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: _onPopInvoked,
         child: Stack(
           children: [
             Center(
@@ -107,12 +123,20 @@ class _ReaderPageState extends State<ReaderPage> {
                 return PhotoViewGalleryPageOptions(
                   imageProvider: PictureKeyImage(pictureKeys[index].key),
                   initialScale: PhotoViewComputedScale.contained,
+                  onTapUp: (context, details, controllerValue) => setState(
+                    () => _showAppBar = !_showAppBar,
+                  ),
                   heroAttributes:
                       PhotoViewHeroAttributes(tag: pictureKeys[index].key),
                 );
               },
               itemCount: pictureKeys.length,
               onPageChanged: (index) {
+                FirebaseAnalytics.instance.logScreenView(
+                  screenName: 'subfolder_page',
+                  screenClass: 'SubFolderPage',
+                  parameters: {'prefix': pictureKeys[index].key},
+                );
                 setState(() {
                   currentPictureUrl = pictureKeys[index].key;
                   currentPictureIndex = index;
@@ -135,6 +159,58 @@ class _ReaderPageState extends State<ReaderPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _onPopInvoked(bool didPop, Object? result) async {
+    if (didPop) {
+      return;
+    }
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        ad.dispose();
+        _interstitialAd = null;
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        ad.dispose();
+        _interstitialAd = null;
+      },
+    );
+
+    final bool shouldPop = await _showInterstitialAd();
+    if (mounted && shouldPop) {
+      Navigator.pop(context, result);
+    }
+  }
+
+  Future<bool> _showInterstitialAd() async {
+    if (_isAdLoaded) {
+      await _interstitialAd!.show();
+      return true;
+    }
+    return false;
+  }
+
+  void _loadAd() async {
+    if (!mounted) {
+      log('Called to load but not mounted.');
+      return;
+    }
+
+    InterstitialAd.load(
+      adUnitId: adUnitId,
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _interstitialAd = ad;
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (error) {
+          log('InterstitialAd failed to load: $error');
+        },
+      ),
+      request: const AdRequest(),
     );
   }
 }
