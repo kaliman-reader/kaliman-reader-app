@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "932529926595",
+    "project_id": "kaliman-reader",
+    "storage_bucket": "kaliman-reader.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:932529926595:android:77ee4d445436577b088d76",
+        "android_client_info": {
+          "package_name": "app.openlinks.kaliman_reader_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCESZflqcF8hV-tK4D8AoZLlhJqJvZJlCM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
