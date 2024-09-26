@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.1.0+2
+version: '2.0.0+7'
 
 environment:
   sdk: '>=2.17.6 <3.0.0'
@@ -30,25 +30,32 @@ dependencies:
   flutter:
     sdk: flutter
   http:
-  photo_view: ^0.14.0
+  photo_view: ^0.15.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   flutter_dotenv: ^5.1.0
+  google_mobile_ads: ^4.0.0
+  path_provider: ^2.1.4
+  share_plus: ^10.0.2
+  url_launcher: ^6.3.0
+  in_app_review: ^2.0.9
+  firebase_analytics: ^11.3.1
+  firebase_core: ^3.4.1
 
 dev_dependencies:
   test:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: '^0.10.0'
+  flutter_launcher_icons: ^0.13.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -67,6 +74,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - .env
+    - assets/kaliman-cover.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

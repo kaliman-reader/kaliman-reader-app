@@ -28,10 +28,14 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
+// START: FlutterFire Configuration
+apply plugin: 'com.google.gms.google-services'
+// END: FlutterFire Configuration
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace = 'app.openlinks.kaliman_reader_app'
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -49,9 +53,9 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.openlinks.kaliman_reader_app"
+        applicationId 'app.openlinks.kaliman_reader_app'
         minSdkVersion 24
-        targetSdkVersion 30
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
