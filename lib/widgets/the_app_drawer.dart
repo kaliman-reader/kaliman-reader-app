@@ -6,7 +6,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TheAppDrawer extends StatelessWidget {
-  const TheAppDrawer({super.key});
+  final Function onDonationTap;
+
+  const TheAppDrawer({super.key, required this.onDonationTap});
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +34,10 @@ class TheAppDrawer extends StatelessWidget {
               });
               InAppReview.instance.openStoreListing();
             },
-            leading: Icon(Icons.star,
-                color: Color(Theme.of(context).colorScheme.primary.value)),
+            leading: Icon(
+              Icons.star,
+              color: Color(Theme.of(context).colorScheme.primary.value),
+            ),
             title: const Text('Danos amor'),
           ),
           ListTile(
@@ -44,8 +48,10 @@ class TheAppDrawer extends StatelessWidget {
                 '¡Hola! Te invito a descargar el Lector de Kaliman donde podrás leer todas las aventuras. ¡Es gratis! $playStoreUrl',
               );
             },
-            leading: Icon(Icons.share,
-                color: Color(Theme.of(context).colorScheme.primary.value)),
+            leading: Icon(
+              Icons.share,
+              color: Color(Theme.of(context).colorScheme.primary.value),
+            ),
             title: const Text('Comparte con tus amigos'),
           ),
           ListTile(
@@ -56,9 +62,23 @@ class TheAppDrawer extends StatelessWidget {
               });
               await launchUrl(Uri.parse(facebookGroupUrl));
             },
-            leading: Icon(Icons.facebook_outlined,
-                color: Color(Theme.of(context).colorScheme.primary.value)),
+            leading: Icon(
+              Icons.facebook_outlined,
+              color: Color(Theme.of(context).colorScheme.primary.value),
+            ),
             title: const Text('Grupo de Facebook'),
+          ),
+          ListTile(
+            onTap: () {
+              FirebaseAnalytics.instance.logEvent(name: 'donation_intent');
+              Navigator.pop(context);
+              onDonationTap();
+            },
+            leading: Icon(
+              Icons.card_giftcard,
+              color: Color(Theme.of(context).colorScheme.primary.value),
+            ),
+            title: const Text('Hacer una donación'),
           ),
         ],
       ),
