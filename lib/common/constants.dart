@@ -7,3 +7,5 @@ const String facebookGroupUrl =
     'https://www.facebook.com/groups/432120258169258/';
 const String playStoreUrl =
     'https://play.google.com/store/apps/details?id=app.openlinks.kaliman_reader_app';
+
+const String downloadComicId = '';
