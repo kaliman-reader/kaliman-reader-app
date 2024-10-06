@@ -74,7 +74,7 @@ class _ReaderPageState extends State<ReaderPage> {
     return Scaffold(
       appBar: _showAppBar
           ? AppBar(
-              title: Text('$currentPictureIndex/${pictureKeys.length}'),
+              title: Text('${currentPictureIndex + 1}/${pictureKeys.length}'),
               actions: [
                 IconButton(
                   icon: Icon(downloadIcon),
