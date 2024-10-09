@@ -39,7 +39,10 @@ class TheAppDrawer extends StatelessWidget {
           ListTile(
             onTap: () async {
               FirebaseAnalytics.instance.logShare(
-                  contentType: 'url', itemId: playStoreUrl, method: 'share');
+                contentType: 'url',
+                itemId: playStoreUrl,
+                method: 'share',
+              );
               await Share.share(
                 '¡Hola! Te invito a descargar el Lector de Kaliman donde podrás leer todas las aventuras. ¡Es gratis! $playStoreUrl',
               );
