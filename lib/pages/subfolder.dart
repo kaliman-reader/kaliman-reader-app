@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:confetti/confetti.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -21,6 +24,10 @@ class SubFolderPage extends StatefulWidget {
 }
 
 class _SubFolderPageState extends State<SubFolderPage> {
+  late String _prefixToBuy;
+  late ConfettiController _confettiController;
+  bool _loadingPayment = false;
+
   void goToReaderPage(context, prefix) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => ReaderPage(prefix: prefix)));
@@ -28,22 +35,46 @@ class _SubFolderPageState extends State<SubFolderPage> {
 
   @override
   void initState() {
+    _prefixToBuy = widget.prefixes[0].prefix;
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
     FirebaseAnalytics.instance.logScreenView(
       screenName: 'subfolder_page',
       screenClass: 'SubFolderPage',
       parameters: {'prefix': widget.prefixes[0].prefix},
     );
-    InAppPurchase.instance.purchaseStream.listen((purchaseDetailsList) async {
-      for (var purchaseDetails in purchaseDetailsList) {
+    InAppPurchase.instance.restorePurchases();
+    InAppPurchase.instance.purchaseStream.listen((
+      List<PurchaseDetails> purchases,
+    ) async {
+      for (var purchaseDetails in purchases) {
+        log('${purchaseDetails.status}: ${purchaseDetails.productID}');
+        if (purchaseDetails.status == PurchaseStatus.canceled) {
+          setState(() {
+            _loadingPayment = false;
+          });
+        }
         if (purchaseDetails.status == PurchaseStatus.purchased) {
-          if (purchaseDetails.pendingCompletePurchase) {
-            await InAppPurchase.instance.completePurchase(purchaseDetails);
-          }
-          FirebaseAnalytics.instance.logPurchase();
-          await PdfDownloadService.downloadPdf(purchaseDetails.productID);
-          scaffoldMessengerKey.currentState?.showSnackBar(const SnackBar(
-            content: Text('¡PDF descargado y guardado!'),
+          var path = await PdfDownloadService.downloadPdf(_prefixToBuy);
+          var state = scaffoldMessengerKey.currentState;
+          _confettiController.play();
+          state?.showSnackBar(SnackBar(
+            content: Text('Página guardada en: $path'),
           ));
+          setState(() {
+            _loadingPayment = false;
+          });
+        }
+        if (purchaseDetails.status == PurchaseStatus.error) {
+          FirebaseAnalytics.instance.logEvent(
+            name: 'purchase_error',
+            parameters: {
+              'error': 'Purchase error',
+              'stack_trace': Error().stackTrace.toString(),
+              'prefix': _prefixToBuy
+            },
+          );
         }
       }
     });
@@ -58,6 +89,13 @@ class _SubFolderPageState extends State<SubFolderPage> {
       ),
       body: Stack(
         children: [
+          Center(
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.directional,
+              blastDirection: -3.14 / 2,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 60),
             child: ListView.builder(
@@ -71,6 +109,10 @@ class _SubFolderPageState extends State<SubFolderPage> {
                     goToReaderPage(context, prefix);
                   },
                   onDownload: (prefix) async {
+                    setState(() {
+                      _prefixToBuy = prefix;
+                      _loadingPayment = true;
+                    });
                     await PurchasePdfService.buyPdf(prefix);
                   },
                   prefix: prefix,
@@ -80,6 +122,18 @@ class _SubFolderPageState extends State<SubFolderPage> {
             ),
           ),
           const AdBanner(),
+          Center(
+            child: _loadingPayment == true
+                ? const Dialog.fullscreen(
+                    backgroundColor: Color.fromRGBO(0, 0, 0, 0.5),
+                    child: SizedBox.expand(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
         ],
       ),
     );
