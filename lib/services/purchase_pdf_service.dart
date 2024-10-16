@@ -22,8 +22,9 @@ class PurchasePdfService {
       final PurchaseParam purchaseParam = PurchaseParam(
         productDetails: product,
       );
-      await InAppPurchase.instance.buyNonConsumable(
+      await InAppPurchase.instance.buyConsumable(
         purchaseParam: purchaseParam,
+        autoConsume: true,
       );
     }
   }

@@ -7,7 +7,10 @@ import 'package:path_provider/path_provider.dart';
 
 class ImageDownloadService {
   static Future<String> downloadImage(
-      String key, String prefix, int index) async {
+    String key,
+    String prefix,
+    int index,
+  ) async {
     var object = await ObjectRepository.getObject(key);
     var response = await get(Uri.parse(object.url));
     var downloadsDirectoryPath = Platform.isAndroid
