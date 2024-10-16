@@ -11,7 +11,6 @@ import 'package:kaliman_reader_app/providers/picture_key_image.dart';
 import 'package:kaliman_reader_app/repositories/object_key_repository.dart';
 import 'package:kaliman_reader_app/services/image_download_service.dart';
 import 'package:kaliman_reader_app/services/image_share_service.dart';
-import 'package:kaliman_reader_app/services/picture_sorter.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -56,9 +55,6 @@ class _ReaderPageState extends State<ReaderPage> {
   getObjectKeys() async {
     pictureKeys = await ObjectKeyRepository.getKeys(widget.prefix);
     currentPictureUrl = pictureKeys[0].key;
-    setState(() {
-      pictureKeys = PictureKeySorter.sort(pictureKeys);
-    });
     setLoading(false);
   }
 
