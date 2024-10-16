@@ -102,6 +102,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+  confetti:
+    dependency: "direct main"
+    description:
+      name: confetti
+      sha256: "79376a99648efbc3f23582f5784ced0fe239922bd1a0fb41f582051eba750751"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.0"
   convert:
     dependency: transitive
     description:
@@ -329,10 +337,10 @@ packages:
     dependency: transitive
     description:
       name: in_app_purchase_android
-      sha256: bee60266e443d4ae0e4809bae7f9cd4d6be75ab5ec6bb3d2ca737774a274a3bd
+      sha256: "6bbb526f2a405d9fe6556bb33e63fbeaff13fde3e42207b19aa5300eca9a1de6"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.6+9"
+    version: "0.3.6+10"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
