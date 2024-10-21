@@ -8,6 +8,7 @@ class Story extends StatelessWidget {
   final GestureTapCallback? onTap;
   final String prefix;
   final bool isFinalFolder;
+  final bool downloadable;
   final OnDownloadCallback onDownload;
 
   const Story({
@@ -17,10 +18,17 @@ class Story extends StatelessWidget {
     required this.prefix,
     required this.isFinalFolder,
     required this.onDownload,
+    required this.downloadable,
   });
 
   @override
   Widget build(BuildContext context) {
+    var color = downloadable
+        ? Color(
+            Theme.of(context).colorScheme.primary.value,
+          )
+        : Colors.green;
+
     return ListTile(
       title: Text(title),
       leading: Image(
@@ -35,11 +43,13 @@ class Story extends StatelessWidget {
       onTap: onTap,
       trailing: IconButton(
         icon: const Icon(Icons.download),
-        color: Color(Theme.of(context).colorScheme.primary.value),
+        color: color,
         tooltip: 'Descargar como PDF',
-        onPressed: () async {
-          await onDownload(prefix);
-        },
+        onPressed: downloadable
+            ? () async {
+                await onDownload(prefix);
+              }
+            : null,
       ),
     );
   }

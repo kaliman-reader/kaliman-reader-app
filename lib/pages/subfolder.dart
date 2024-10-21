@@ -10,6 +10,7 @@ import 'package:kaliman_reader_app/pages/reader_page.dart';
 import 'package:kaliman_reader_app/services/pdf_download_service.dart';
 import 'package:kaliman_reader_app/services/purchase_pdf_service.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/story.dart';
 
@@ -26,11 +27,17 @@ class SubFolderPage extends StatefulWidget {
 class _SubFolderPageState extends State<SubFolderPage> {
   late String _prefixToBuy;
   late ConfettiController _confettiController;
+  late SharedPreferences _prefs;
+  List<String> downloadedPrefixes = [];
   bool _loadingPayment = false;
 
   void goToReaderPage(context, prefix) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => ReaderPage(prefix: prefix)));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReaderPage(prefix: prefix),
+      ),
+    );
   }
 
   @override
@@ -39,6 +46,10 @@ class _SubFolderPageState extends State<SubFolderPage> {
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
+    SharedPreferences.getInstance().then((value) {
+      _prefs = value;
+      downloadedPrefixes = _prefs.getStringList(downloadedPrefixesKey) ?? [];
+    });
     FirebaseAnalytics.instance.logScreenView(
       screenName: 'subfolder_page',
       screenClass: 'SubFolderPage',
@@ -64,6 +75,8 @@ class _SubFolderPageState extends State<SubFolderPage> {
           ));
           setState(() {
             _loadingPayment = false;
+            downloadedPrefixes.add(_prefixToBuy);
+            _prefs.setStringList(downloadedPrefixesKey, downloadedPrefixes);
           });
         }
         if (purchaseDetails.status == PurchaseStatus.error) {
@@ -108,6 +121,7 @@ class _SubFolderPageState extends State<SubFolderPage> {
                   onTap: () {
                     goToReaderPage(context, prefix);
                   },
+                  downloadable: !downloadedPrefixes.contains(prefix),
                   onDownload: (prefix) async {
                     setState(() {
                       _prefixToBuy = prefix;
@@ -124,11 +138,21 @@ class _SubFolderPageState extends State<SubFolderPage> {
           const AdBanner(),
           Center(
             child: _loadingPayment == true
-                ? const Dialog.fullscreen(
-                    backgroundColor: Color.fromRGBO(0, 0, 0, 0.5),
-                    child: SizedBox.expand(
-                      child: Center(
-                        child: CircularProgressIndicator(),
+                ? Dialog.fullscreen(
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(),
+                          Text(
+                            'Descargando...',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const Text(
+                            'Esto tardará unos pocos segundos...',
+                          ),
+                        ],
                       ),
                     ),
                   )
