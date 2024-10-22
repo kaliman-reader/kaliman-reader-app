@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
         firstLevelPrefixes = prefixes;
       });
     } catch (exception) {
-      FirebaseAnalytics.instance.logEvent(name: 'error', parameters: {
+      FirebaseAnalytics.instance.logEvent(name: 'prefixes_error', parameters: {
         'error': exception.toString(),
         'stack_trace': Error().stackTrace.toString(),
         'prefix': prefix.prefix

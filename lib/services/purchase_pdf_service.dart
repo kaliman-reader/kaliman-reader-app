@@ -9,7 +9,7 @@ class PurchasePdfService {
     final ProductDetailsResponse response =
         await InAppPurchase.instance.queryProductDetails(productIds);
     if (response.notFoundIDs.isNotEmpty) {
-      FirebaseAnalytics.instance.logEvent(name: 'error', parameters: {
+      FirebaseAnalytics.instance.logEvent(name: 'purchase_error', parameters: {
         'error': 'Product not found',
         'stack_trace': Error().stackTrace.toString(),
         'prefix': prefix

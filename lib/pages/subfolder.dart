@@ -48,7 +48,9 @@ class _SubFolderPageState extends State<SubFolderPage> {
     );
     SharedPreferences.getInstance().then((value) {
       _prefs = value;
-      downloadedPrefixes = _prefs.getStringList(downloadedPrefixesKey) ?? [];
+      setState(() {
+        downloadedPrefixes = _prefs.getStringList(downloadedPrefixesKey) ?? [];
+      });
     });
     FirebaseAnalytics.instance.logScreenView(
       screenName: 'subfolder_page',

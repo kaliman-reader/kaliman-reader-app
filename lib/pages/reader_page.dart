@@ -166,7 +166,7 @@ class _ReaderPageState extends State<ReaderPage> {
   }
 
   void _onPopInvoked(bool didPop, Object? result) async {
-    if (didPop) {
+    if (didPop || _interstitialAd == null) {
       return;
     }
     _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
@@ -191,7 +191,7 @@ class _ReaderPageState extends State<ReaderPage> {
       await _interstitialAd!.show();
       return true;
     }
-    return false;
+    return true;
   }
 
   void _loadAd() async {
@@ -210,6 +210,8 @@ class _ReaderPageState extends State<ReaderPage> {
           });
         },
         onAdFailedToLoad: (error) {
+          _isAdLoaded = false;
+          _interstitialAd = null;
           log('InterstitialAd failed to load: $error');
         },
       ),
