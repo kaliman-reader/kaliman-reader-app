@@ -34,10 +34,10 @@ class MyApp extends StatelessWidget {
       title: 'Lector de Kaliman',
       themeMode: ThemeMode.system,
       theme: ThemeData.from(
-        colorScheme: ColorScheme.light(primary: Color(Colors.orange.value)),
+        colorScheme: const ColorScheme.light(primary: Colors.orange),
       ),
       darkTheme: ThemeData.from(
-        colorScheme: ColorScheme.dark(primary: Color(Colors.deepOrange.value)),
+        colorScheme: const ColorScheme.dark(primary: Colors.deepOrange),
       ),
       home: const MyHomePage(title: 'Lector de Kaliman'),
       scaffoldMessengerKey: scaffoldMessengerKey,
@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
         firstLevelPrefixes = prefixes;
       });
     } catch (exception) {
-      FirebaseAnalytics.instance.logEvent(name: 'error', parameters: {
+      FirebaseAnalytics.instance.logEvent(name: 'prefixes_error', parameters: {
         'error': exception.toString(),
         'stack_trace': Error().stackTrace.toString(),
         'prefix': prefix.prefix

@@ -32,20 +32,24 @@ class TheAppDrawer extends StatelessWidget {
               });
               InAppReview.instance.openStoreListing();
             },
-            leading: Icon(Icons.star,
-                color: Color(Theme.of(context).colorScheme.primary.value)),
+            leading: const Icon(
+              Icons.favorite,
+              color: Colors.red,
+            ),
             title: const Text('Danos amor'),
           ),
           ListTile(
             onTap: () async {
               FirebaseAnalytics.instance.logShare(
-                  contentType: 'url', itemId: playStoreUrl, method: 'share');
+                contentType: 'url',
+                itemId: playStoreUrl,
+                method: 'share',
+              );
               await Share.share(
                 '¡Hola! Te invito a descargar el Lector de Kaliman donde podrás leer todas las aventuras. ¡Es gratis! $playStoreUrl',
               );
             },
-            leading: Icon(Icons.share,
-                color: Color(Theme.of(context).colorScheme.primary.value)),
+            leading: Icon(Icons.share, color: Colors.purple.shade200),
             title: const Text('Comparte con tus amigos'),
           ),
           ListTile(
@@ -56,9 +60,37 @@ class TheAppDrawer extends StatelessWidget {
               });
               await launchUrl(Uri.parse(facebookGroupUrl));
             },
-            leading: Icon(Icons.facebook_outlined,
-                color: Color(Theme.of(context).colorScheme.primary.value)),
+            leading: Icon(
+              Icons.facebook_outlined,
+              color: Colors.blue.shade700,
+            ),
             title: const Text('Grupo de Facebook'),
+          ),
+          ListTile(
+            onTap: () async {
+              FirebaseAnalytics.instance.logEvent(name: 'view_disclaimer');
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('Información'),
+                      content: const Text(disclaimerText),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Aceptar'),
+                        ),
+                      ],
+                    );
+                  });
+            },
+            leading: const Icon(
+              Icons.info,
+              color: Colors.yellow,
+            ),
+            title: const Text('Información'),
           ),
         ],
       ),
