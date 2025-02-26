@@ -9,6 +9,7 @@ const String playStoreUrl =
     'https://play.google.com/store/apps/details?id=app.openlinks.kaliman_reader_app';
 
 const String downloadedPrefixesKey = 'DOWNLOADED_PREFIXES';
+const String finishedPrefixesKey = 'FINISHED_PREFIXES';
 const String disclaimerText = '''
 Nos alegra que formes parte de esta increíble comunidad de Kaliamigos. La publicidad y las compras dentro de la aplicación nos permiten seguir desarrollando la plataforma, mantener los servidores y ofrecer una mejor experiencia para todos los seguidores de Kalimán, el hombre increíble.
 

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:http/http.dart' as http;
@@ -10,7 +9,6 @@ class PdfRepository {
   static Future<Pdf> getPdf(String prefix) async {
     final String url = '$apiUrl/pdfs/?prefix=$prefix';
     try {
-      log('Fetching; $url');
       http.Response response = await http.get(Uri.parse(url));
       Map<String, dynamic> json = jsonDecode(response.body);
       return Pdf.fromJson(json);
