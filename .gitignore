@@ -52,3 +52,4 @@ app.*.map.json
 # Firebase
 firebase.json
 lib/firebase_options.dart
+android/app/.cxx/
