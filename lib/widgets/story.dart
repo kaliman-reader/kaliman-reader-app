@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kaliman_reader_app/providers/leading_image.dart';
+import 'package:kaliman_reader_app/widgets/progress_icon.dart';
 
 typedef OnDownloadCallback = Future<void> Function(String prefix);
 
@@ -8,8 +9,7 @@ class Story extends StatelessWidget {
   final GestureTapCallback? onTap;
   final String prefix;
   final bool isFinalFolder;
-  final bool downloadable;
-  final OnDownloadCallback onDownload;
+  final double? progress;
 
   const Story({
     super.key,
@@ -17,8 +17,7 @@ class Story extends StatelessWidget {
     this.onTap,
     required this.prefix,
     required this.isFinalFolder,
-    required this.onDownload,
-    required this.downloadable,
+    this.progress,
   });
 
   @override
@@ -34,6 +33,7 @@ class Story extends StatelessWidget {
           width: 40,
         ),
       ),
+      trailing: progress != null ? ProgressIcon(progress: progress!) : null,
       onTap: onTap,
     );
   }

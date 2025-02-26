@@ -8,7 +8,6 @@ import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/reader_page.dart';
 import 'package:kaliman_reader_app/services/pdf_download_service.dart';
-import 'package:kaliman_reader_app/services/purchase_pdf_service.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,8 +17,11 @@ class SubFolderPage extends StatefulWidget {
   final List<Prefix> prefixes;
   final Prefix prefix;
 
-  const SubFolderPage(
-      {super.key, required this.prefixes, required this.prefix});
+  const SubFolderPage({
+    super.key,
+    required this.prefixes,
+    required this.prefix,
+  });
   @override
   State<StatefulWidget> createState() => _SubFolderPageState();
 }
@@ -31,8 +33,8 @@ class _SubFolderPageState extends State<SubFolderPage> {
   List<String> downloadedPrefixes = [];
   bool _loadingPayment = false;
 
-  void goToReaderPage(context, prefix) {
-    Navigator.push(
+  Future<dynamic> goToReaderPage(context, prefix) async {
+    return Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ReaderPage(prefix: prefix),
@@ -120,19 +122,13 @@ class _SubFolderPageState extends State<SubFolderPage> {
                 return Story(
                   title: prefix.replaceAllMapped(
                       RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})'),
-                  onTap: () {
-                    goToReaderPage(context, prefix);
-                  },
-                  downloadable: !downloadedPrefixes.contains(prefix),
-                  onDownload: (prefix) async {
-                    setState(() {
-                      _prefixToBuy = prefix;
-                      _loadingPayment = true;
-                    });
-                    await PurchasePdfService.buyPdf(prefix);
+                  onTap: () async {
+                    await goToReaderPage(context, prefix);
+                    setState(() {});
                   },
                   prefix: prefix,
                   isFinalFolder: true,
+                  progress: _prefs.getDouble(prefix),
                 );
               },
             ),

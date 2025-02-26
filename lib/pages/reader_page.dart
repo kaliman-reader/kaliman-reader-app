@@ -14,6 +14,7 @@ import 'package:kaliman_reader_app/services/image_share_service.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ReaderPage extends StatefulWidget {
   final String prefix;
@@ -29,7 +30,8 @@ class _ReaderPageState extends State<ReaderPage> {
   bool _loading = true;
   bool _showAppBar = false;
   var downloadIcon = Icons.download;
-
+  late SharedPreferences _prefs;
+  var pageController = PageController();
   bool _isAdLoaded = false;
   InterstitialAd? _interstitialAd;
   final String adUnitId = dotenv.get('AD_INTERSTITIAL_UNIT_ID');
@@ -49,6 +51,9 @@ class _ReaderPageState extends State<ReaderPage> {
       screenClass: 'ReaderPage',
       parameters: {'prefix': widget.prefix},
     );
+    SharedPreferences.getInstance().then((prefs) async {
+      _prefs = prefs;
+    });
     super.initState();
   }
 
@@ -56,6 +61,14 @@ class _ReaderPageState extends State<ReaderPage> {
     pictureKeys = await ObjectKeyRepository.getKeys(widget.prefix);
     currentPictureUrl = pictureKeys[0].key;
     setLoading(false);
+    final progress = _prefs.getDouble(widget.prefix);
+    if (progress != null) {
+      pageController.animateToPage(
+        (progress * pictureKeys.length).floor() - 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -131,11 +144,16 @@ class _ReaderPageState extends State<ReaderPage> {
                     );
                   },
                   itemCount: pictureKeys.length,
-                  onPageChanged: (index) {
+                  pageController: pageController,
+                  onPageChanged: (index) async {
                     FirebaseAnalytics.instance.logScreenView(
                       screenName: 'reader_page',
                       screenClass: 'ReaderPage',
                       parameters: {'prefix': pictureKeys[index].key},
+                    );
+                    await _prefs.setDouble(
+                      widget.prefix,
+                      (index + 1).toDouble() / pictureKeys.length,
                     );
                     setState(() {
                       currentPictureUrl = pictureKeys[index].key;
@@ -168,6 +186,11 @@ class _ReaderPageState extends State<ReaderPage> {
   void _onPopInvoked(bool didPop, Object? result) async {
     log('pop invoked $didPop ');
     if (didPop) {
+      return;
+    }
+    if (currentPictureIndex < 5) {
+      log('Not showing interstitial ad because currentPictureIndex is less than 5');
+      Navigator.pop(context, result);
       return;
     }
     if (_interstitialAd == null) {

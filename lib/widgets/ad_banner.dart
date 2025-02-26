@@ -69,9 +69,9 @@ class _AdBannerState extends State<AdBanner> {
           });
         },
         // Called when an ad request failed.
-        onAdFailedToLoad: (ad, err) {
+        onAdFailedToLoad: (ad, err) async {
           log('Ad failed to load: $err');
-          ad.dispose();
+          await ad.dispose();
         },
         // Called when an ad opens an overlay that covers the screen.
         onAdOpened: (Ad ad) {
