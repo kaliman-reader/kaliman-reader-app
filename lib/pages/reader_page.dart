@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' hide KeyboardKey;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kaliman_reader_app/common/constants.dart';
@@ -15,6 +15,7 @@ import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:volume_controller/volume_controller.dart';
 
 class ReaderPage extends StatefulWidget {
   final String prefix;
@@ -35,6 +36,8 @@ class _ReaderPageState extends State<ReaderPage> {
   bool _isAdLoaded = false;
   InterstitialAd? _interstitialAd;
   final String adUnitId = dotenv.get('AD_INTERSTITIAL_UNIT_ID');
+  static const platform =
+      MethodChannel('app.openlinks.kaliman_reader_app/buttons');
 
   setLoading(bool loading) {
     setState(() {
@@ -51,9 +54,35 @@ class _ReaderPageState extends State<ReaderPage> {
       screenClass: 'ReaderPage',
       parameters: {'prefix': widget.prefix},
     );
-    SharedPreferences.getInstance().then((prefs) async {
+    SharedPreferences.getInstance().then((prefs) {
       _prefs = prefs;
+      getObjectKeys();
     });
+
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'volume_button') {
+        String button = call.arguments as String? ?? 'unknown';
+        setState(() {
+          if (button == "VOLUME_UP") {
+            if (currentPictureIndex > 0) {
+              pageController.previousPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+          } else if (button == "VOLUME_DOWN") {
+            if (currentPictureIndex < pictureKeys.length - 1) {
+              pageController.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+          }
+        });
+      }
+      return; // no result needed for one-way call
+    });
+
     super.initState();
   }
 
@@ -73,6 +102,7 @@ class _ReaderPageState extends State<ReaderPage> {
 
   @override
   void dispose() {
+    VolumeController.instance.removeListener();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }

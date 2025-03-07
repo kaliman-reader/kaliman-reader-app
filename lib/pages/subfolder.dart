@@ -1,13 +1,8 @@
-import 'dart:developer';
-
 import 'package:confetti/confetti.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/reader_page.dart';
-import 'package:kaliman_reader_app/services/pdf_download_service.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,11 +22,8 @@ class SubFolderPage extends StatefulWidget {
 }
 
 class _SubFolderPageState extends State<SubFolderPage> {
-  late String _prefixToBuy;
   late ConfettiController _confettiController;
-  late SharedPreferences _prefs;
-  List<String> downloadedPrefixes = [];
-  bool _loadingPayment = false;
+  SharedPreferences? _prefs;
 
   Future<dynamic> goToReaderPage(context, prefix) async {
     return Navigator.push(
@@ -44,57 +36,18 @@ class _SubFolderPageState extends State<SubFolderPage> {
 
   @override
   void initState() {
-    _prefixToBuy = widget.prefixes[0].prefix;
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
     SharedPreferences.getInstance().then((value) {
       _prefs = value;
-      setState(() {
-        downloadedPrefixes = _prefs.getStringList(downloadedPrefixesKey) ?? [];
-      });
+      setState(() {});
     });
     FirebaseAnalytics.instance.logScreenView(
       screenName: 'subfolder_page',
       screenClass: 'SubFolderPage',
       parameters: {'prefix': widget.prefixes[0].prefix},
     );
-    InAppPurchase.instance.restorePurchases();
-    InAppPurchase.instance.purchaseStream.listen((
-      List<PurchaseDetails> purchases,
-    ) async {
-      for (var purchaseDetails in purchases) {
-        log('${purchaseDetails.status}: ${purchaseDetails.productID}');
-        if (purchaseDetails.status == PurchaseStatus.canceled) {
-          setState(() {
-            _loadingPayment = false;
-          });
-        }
-        if (purchaseDetails.status == PurchaseStatus.purchased) {
-          var path = await PdfDownloadService.downloadPdf(_prefixToBuy);
-          var state = scaffoldMessengerKey.currentState;
-          _confettiController.play();
-          state?.showSnackBar(SnackBar(
-            content: Text('Página guardada en: $path'),
-          ));
-          setState(() {
-            _loadingPayment = false;
-            downloadedPrefixes.add(_prefixToBuy);
-            _prefs.setStringList(downloadedPrefixesKey, downloadedPrefixes);
-          });
-        }
-        if (purchaseDetails.status == PurchaseStatus.error) {
-          FirebaseAnalytics.instance.logEvent(
-            name: 'purchase_error',
-            parameters: {
-              'error': 'Purchase error',
-              'stack_trace': Error().stackTrace.toString(),
-              'prefix': _prefixToBuy
-            },
-          );
-        }
-      }
-    });
     super.initState();
   }
 
@@ -111,6 +64,7 @@ class _SubFolderPageState extends State<SubFolderPage> {
               confettiController: _confettiController,
               blastDirectionality: BlastDirectionality.directional,
               blastDirection: -3.14 / 2,
+              emissionFrequency: 0.2,
             ),
           ),
           Padding(
@@ -128,34 +82,12 @@ class _SubFolderPageState extends State<SubFolderPage> {
                   },
                   prefix: prefix,
                   isFinalFolder: true,
-                  progress: _prefs.getDouble(prefix),
+                  progress: _prefs?.getDouble(prefix),
                 );
               },
             ),
           ),
           const AdBanner(),
-          Center(
-            child: _loadingPayment == true
-                ? Dialog.fullscreen(
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircularProgressIndicator(),
-                          Text(
-                            'Descargando...',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const Text(
-                            'Esto tardará unos pocos segundos...',
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : null,
-          ),
         ],
       ),
     );
