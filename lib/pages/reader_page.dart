@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' hide KeyboardKey;
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kaliman_reader_app/common/constants.dart';
@@ -15,7 +15,6 @@ import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:volume_controller/volume_controller.dart';
 
 class ReaderPage extends StatefulWidget {
   final String prefix;
@@ -102,7 +101,6 @@ class _ReaderPageState extends State<ReaderPage> {
 
   @override
   void dispose() {
-    VolumeController.instance.removeListener();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
