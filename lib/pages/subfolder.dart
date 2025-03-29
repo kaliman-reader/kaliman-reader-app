@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/reader_page.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
+import 'package:kaliman_reader_app/widgets/story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../widgets/story.dart';
 
 class SubFolderPage extends StatefulWidget {
   final List<Prefix> prefixes;

@@ -14,11 +14,9 @@ class ImageDownloadService {
     var object = await ObjectRepository.getObject(key);
     var response = await get(Uri.parse(object.url));
     var downloadsDirectoryPath = Platform.isAndroid
-        ? '/storage/emulated/0/Download/'
-        : await getDownloadsDirectory();
-    var file = File('$downloadsDirectoryPath/$key');
-    var folderPath = '$downloadsDirectoryPath/$prefix';
-    await Directory(folderPath).create(recursive: true);
+        ? '/storage/emulated/0/Download'
+        : (await getDownloadsDirectory())?.path;
+    var file = File('$downloadsDirectoryPath/${key.replaceAll('/', '_')}');
     file = await file.writeAsBytes(response.bodyBytes, mode: FileMode.write);
     FirebaseAnalytics.instance.logEvent(
       name: 'download_page',
