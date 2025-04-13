@@ -90,7 +90,7 @@ class _ReaderPageState extends State<ReaderPage> {
     currentPictureUrl = pictureKeys[0].key;
     setLoading(false);
     final progress = _prefs.getDouble(widget.prefix);
-    if (progress != null) {
+    if (progress != null && progress != 1) {
       pageController.animateToPage(
         (progress * pictureKeys.length).floor() - 1,
         duration: const Duration(milliseconds: 300),
