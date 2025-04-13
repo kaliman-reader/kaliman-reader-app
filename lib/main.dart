@@ -7,13 +7,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/firebase_options.dart';
+import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/subfolder.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:kaliman_reader_app/widgets/grid_story.dart';
 import 'package:kaliman_reader_app/widgets/the_app_drawer.dart';
-
-import 'models/prefix.dart';
 
 Future main() async {
   await dotenv.load();
@@ -101,6 +100,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 )));
   }
 
+  int _getColumnCount(double width) {
+    if (width < 600) {
+      return 2;
+    } else if (width < 900) {
+      return 3;
+    } else if (width < 1200) {
+      return 4;
+    } else {
+      return 5;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,36 +132,49 @@ class _MyHomePageState extends State<MyHomePage> {
                       : null,
                 ),
               ),
-              GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, mainAxisSpacing: 40),
-                padding: const EdgeInsets.only(bottom: 100),
-                itemCount: firstLevelPrefixes.length,
-                itemBuilder: (context, index) {
-                  final currentPrefix = firstLevelPrefixes[index];
-                  return GridStory(
-                    title: currentPrefix.prefix.replaceAll(RegExp(r'\/'), ''),
-                    prefix: currentPrefix.prefix,
-                    isFinalFolder: false,
-                    onTap: () async {
-                      setLoading(true);
-                      try {
-                        var prefixes = await PrefixRepository.getPrefixes(
-                            currentPrefix.prefix);
-                        goToSubFolderPage(currentPrefix, prefixes);
-                      } catch (err) {
-                        var state = scaffoldMessengerKey.currentState;
-                        state?.showSnackBar(const SnackBar(
-                          content:
-                              Text('¡Pronto tendremos más novedades para ti!'),
-                        ));
-                      } finally {
-                        setLoading(false);
-                      }
-                    },
-                  );
-                },
-              ),
+              LayoutBuilder(builder: (context, constraints) {
+                // Calculate number of columns based on available width
+                final double width = constraints.maxWidth;
+                // Responsive column count based on screen width
+                final int crossAxisCount = _getColumnCount(width);
+
+                return GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 24,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.65,
+                  ),
+                  padding: const EdgeInsets.only(bottom: 100),
+                  itemCount: firstLevelPrefixes.length,
+                  itemBuilder: (context, index) {
+                    final currentPrefix = firstLevelPrefixes[index];
+                    return GridStory(
+                      title: currentPrefix.prefix
+                          .replaceAll(RegExp(r'\/'), '')
+                          .replaceAll(RegExp(r'A\.|K\.'), ''),
+                      prefix: currentPrefix.prefix,
+                      isFinalFolder: false,
+                      onTap: () async {
+                        setLoading(true);
+                        try {
+                          var prefixes = await PrefixRepository.getPrefixes(
+                              currentPrefix.prefix);
+                          goToSubFolderPage(currentPrefix, prefixes);
+                        } catch (err) {
+                          var state = scaffoldMessengerKey.currentState;
+                          state?.showSnackBar(const SnackBar(
+                            content: Text(
+                                '¡Pronto tendremos más novedades para ti!'),
+                          ));
+                        } finally {
+                          setLoading(false);
+                        }
+                      },
+                    );
+                  },
+                );
+              }),
               const AdBanner(),
             ],
           )),
