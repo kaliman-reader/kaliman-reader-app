@@ -8,7 +8,9 @@ class ObjectRepository {
   static Future<Object> getObject(String key) async {
     final String url = '$apiUrl/objects/?key=$key';
     http.Response response = await http.get(Uri.parse(url));
-    Map<String, dynamic> json = jsonDecode(response.body);
+    Map<String, dynamic> json = jsonDecode(
+      utf8.decode(response.bodyBytes, allowMalformed: true),
+    );
     return Object.fromJson(json);
   }
 }

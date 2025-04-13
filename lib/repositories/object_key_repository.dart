@@ -8,7 +8,9 @@ class ObjectKeyRepository {
   static Future<List<PictureKey>> getKeys(String prefix) async {
     var url = '$apiUrl/prefixes/?prefix=$prefix';
     http.Response response = await http.get(Uri.parse(url));
-    List<dynamic> prefixes = jsonDecode(response.body);
+    List<dynamic> prefixes = jsonDecode(
+      utf8.decode(response.bodyBytes, allowMalformed: true),
+    );
     return prefixes
         .map((e) => PictureKey.fromJson(e))
         .where((element) => element.size > 0)

@@ -10,7 +10,9 @@ class PdfRepository {
     final String url = '$apiUrl/pdfs/?prefix=$prefix';
     try {
       http.Response response = await http.get(Uri.parse(url));
-      Map<String, dynamic> json = jsonDecode(response.body);
+      Map<String, dynamic> json = jsonDecode(
+        utf8.decode(response.bodyBytes, allowMalformed: true),
+      );
       return Pdf.fromJson(json);
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'pdf_error', parameters: {
