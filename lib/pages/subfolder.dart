@@ -73,8 +73,10 @@ class _SubFolderPageState extends State<SubFolderPage> {
               itemBuilder: (context, index) {
                 final prefix = widget.prefixes[index].prefix;
                 return Story(
-                  title: prefix.replaceAllMapped(
-                      RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})'),
+                  title: prefix
+                      .replaceAllMapped(
+                          RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})')
+                      .replaceAll(RegExp(r'A\.|K\.'), ''),
                   onTap: () async {
                     await goToReaderPage(context, prefix);
                     setState(() {});
