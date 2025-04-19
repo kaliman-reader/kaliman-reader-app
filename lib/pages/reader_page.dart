@@ -37,6 +37,7 @@ class _ReaderPageState extends State<ReaderPage> {
   final String adUnitId = dotenv.get('AD_INTERSTITIAL_UNIT_ID');
   static const platform =
       MethodChannel('app.openlinks.kaliman_reader_app/buttons');
+  var pagesRead = 0;
 
   setLoading(bool loading) {
     setState(() {
@@ -91,11 +92,16 @@ class _ReaderPageState extends State<ReaderPage> {
     setLoading(false);
     final progress = _prefs.getDouble(widget.prefix);
     if (progress != null && progress != 1) {
-      pageController.animateToPage(
-        (progress * pictureKeys.length).floor() - 1,
+      final index = (progress * pictureKeys.length).floor() - 1;
+      await pageController.animateToPage(
+        index,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+      setState(() {
+        currentPictureIndex = index;
+        pagesRead = 0;
+      });
     }
   }
 
@@ -174,17 +180,24 @@ class _ReaderPageState extends State<ReaderPage> {
                   itemCount: pictureKeys.length,
                   pageController: pageController,
                   onPageChanged: (index) async {
+                    await _prefs.setDouble(
+                      widget.prefix,
+                      (index + 1).toDouble() / pictureKeys.length,
+                    );
                     FirebaseAnalytics.instance.logScreenView(
                       screenName: 'reader_page',
                       screenClass: 'ReaderPage',
                       parameters: {'prefix': pictureKeys[index].key},
                     );
-                    await _prefs.setDouble(
-                      widget.prefix,
-                      (index + 1).toDouble() / pictureKeys.length,
-                    );
                     setState(() {
                       currentPictureUrl = pictureKeys[index].key;
+                      // We increment pagesRead when user moves forward in the comic
+                      // currentPictureIndex is the previous page
+                      // index is the new page they're moving to
+                      // So if previous < new, they're moving forward
+                      if (currentPictureIndex < index) {
+                        pagesRead++;
+                      }
                       currentPictureIndex = index;
                       downloadIcon = Icons.download;
                     });
@@ -216,8 +229,7 @@ class _ReaderPageState extends State<ReaderPage> {
     if (didPop) {
       return;
     }
-    if (currentPictureIndex < 5) {
-      log('Not showing interstitial ad because currentPictureIndex is less than 5');
+    if (pagesRead < 10 && currentPictureIndex <= pictureKeys.length - 1) {
       Navigator.pop(context, result);
       return;
     }
