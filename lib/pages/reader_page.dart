@@ -37,6 +37,7 @@ class _ReaderPageState extends State<ReaderPage> {
   final String adUnitId = dotenv.get('AD_INTERSTITIAL_UNIT_ID');
   static const platform =
       MethodChannel('app.openlinks.kaliman_reader_app/buttons');
+  var pagesRead = 0;
 
   setLoading(bool loading) {
     setState(() {
@@ -57,6 +58,7 @@ class _ReaderPageState extends State<ReaderPage> {
       _prefs = prefs;
       getObjectKeys();
     });
+    log('pagesRead: $pagesRead');
 
     platform.setMethodCallHandler((call) async {
       if (call.method == 'volume_button') {
@@ -91,11 +93,17 @@ class _ReaderPageState extends State<ReaderPage> {
     setLoading(false);
     final progress = _prefs.getDouble(widget.prefix);
     if (progress != null && progress != 1) {
-      pageController.animateToPage(
-        (progress * pictureKeys.length).floor() - 1,
+      final index = (progress * pictureKeys.length).floor() - 1;
+      await pageController.animateToPage(
+        index,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+      setState(() {
+        currentPictureIndex = index;
+        pagesRead = 0;
+        log('pagesRead after setting: $pagesRead');
+      });
     }
   }
 
@@ -179,12 +187,20 @@ class _ReaderPageState extends State<ReaderPage> {
                       screenClass: 'ReaderPage',
                       parameters: {'prefix': pictureKeys[index].key},
                     );
-                    await _prefs.setDouble(
+                    _prefs.setDouble(
                       widget.prefix,
                       (index + 1).toDouble() / pictureKeys.length,
                     );
                     setState(() {
                       currentPictureUrl = pictureKeys[index].key;
+                      // We increment pagesRead when user moves forward in the manga
+                      // currentPictureIndex is the previous page
+                      // index is the new page they're moving to
+                      // So if previous < new, they're moving forward
+                      if (currentPictureIndex < index) {
+                        pagesRead++;
+                        log('current pagesRead: $pagesRead');
+                      }
                       currentPictureIndex = index;
                       downloadIcon = Icons.download;
                     });
@@ -216,8 +232,7 @@ class _ReaderPageState extends State<ReaderPage> {
     if (didPop) {
       return;
     }
-    if (currentPictureIndex < 5) {
-      log('Not showing interstitial ad because currentPictureIndex is less than 5');
+    if (pagesRead < 10 && currentPictureIndex <= pictureKeys.length - 1) {
       Navigator.pop(context, result);
       return;
     }

@@ -70,6 +70,7 @@ class _SubFolderPageState extends State<SubFolderPage> {
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 60),
             child: ListView.builder(
               itemCount: widget.prefixes.length,
+              cacheExtent: MediaQuery.of(context).size.height,
               itemBuilder: (context, index) {
                 final prefix = widget.prefixes[index].prefix;
                 return Story(

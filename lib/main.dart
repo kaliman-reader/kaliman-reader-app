@@ -10,6 +10,7 @@ import 'package:kaliman_reader_app/firebase_options.dart';
 import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/subfolder.dart';
 import 'package:kaliman_reader_app/repositories/prefix_repository.dart';
+import 'package:kaliman_reader_app/utils/cache_manager.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:kaliman_reader_app/widgets/grid_story.dart';
 import 'package:kaliman_reader_app/widgets/the_app_drawer.dart';
@@ -21,6 +22,10 @@ Future main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize the cache manager
+  await CacheManager().initCaches();
+
   runApp(const MyApp());
 }
 
@@ -120,19 +125,19 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Aventuras de Kaliman'),
       ),
       body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Stack(
-            children: [
-              Center(
-                child: SizedBox(
-                  width: 20.0,
-                  height: 20.0,
-                  child: _loading == true
-                      ? const CircularProgressIndicator()
-                      : null,
-                ),
+        padding: const EdgeInsets.all(16.0),
+        child: Stack(
+          children: [
+            Center(
+              child: SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child:
+                    _loading == true ? const CircularProgressIndicator() : null,
               ),
-              LayoutBuilder(builder: (context, constraints) {
+            ),
+            LayoutBuilder(
+              builder: (context, constraints) {
                 // Calculate number of columns based on available width
                 final double width = constraints.maxWidth;
                 // Responsive column count based on screen width
@@ -145,6 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisSpacing: 16,
                     childAspectRatio: 0.65,
                   ),
+                  cacheExtent: MediaQuery.of(context).size.height * 2,
                   padding: const EdgeInsets.only(bottom: 100),
                   itemCount: firstLevelPrefixes.length,
                   itemBuilder: (context, index) {
@@ -174,10 +180,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   },
                 );
-              }),
-              const AdBanner(),
-            ],
-          )),
+              },
+            ),
+            const AdBanner(),
+          ],
+        ),
+      ),
     );
   }
 }
