@@ -9,4 +9,10 @@ class Prefix {
     }
     return Prefix(prefix: json['Prefix']);
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Prefix': prefix,
+    };
+  }
 }
