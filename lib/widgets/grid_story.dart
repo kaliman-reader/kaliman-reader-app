@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kaliman_reader_app/providers/leading_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class GridStory extends StatelessWidget {
   final String title;
@@ -42,6 +43,24 @@ class GridStory extends StatelessWidget {
                         prefix,
                         isFinalFolder: isFinalFolder,
                       ),
+                      frameBuilder:
+                          (context, child, frame, wasSynchronouslyLoaded) {
+                        if (wasSynchronouslyLoaded || frame != null) {
+                          return child;
+                        }
+                        return Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 120,
+                            height: 170,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
