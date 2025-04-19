@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kaliman_reader_app/repositories/object_repository.dart';
+import 'package:kaliman_reader_app/services/image_cache_service.dart';
 
 class PictureKeyImage extends ImageProvider<PictureKeyImage> {
   /// Creates an object that fetches the image at the given URL.
@@ -45,18 +45,6 @@ class PictureKeyImage extends ImageProvider<PictureKeyImage> {
     );
   }
 
-  // Do not access this field directly; use [_httpClient] instead.
-  // We set `autoUncompress` to false to ensure that we can trust the value of
-  // the `Content-Length` HTTP header. We automatically uncompress the content
-  // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()
-    ..autoUncompress = false;
-
-  static HttpClient get _httpClient {
-    HttpClient client = _sharedHttpClient;
-    return client;
-  }
-
   Future<ui.Codec> _loadAsync(
     PictureKeyImage key,
     StreamController<ImageChunkEvent> chunkEvents,
@@ -65,34 +53,16 @@ class PictureKeyImage extends ImageProvider<PictureKeyImage> {
     try {
       assert(key == this);
       var url = (await ObjectRepository.getObject(key.key)).url;
-      final Uri resolved = Uri.base.resolve(url);
 
-      final HttpClientRequest request = await _httpClient.getUrl(resolved);
+      // Initialize the cache service
+      final cacheService = ImageCacheService();
 
-      headers?.forEach((String name, String value) {
-        request.headers.add(name, value);
-      });
-      final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok) {
-        // The network may be only temporarily unavailable, or the file will be
-        // added on the server later. Avoid having future calls to resolve
-        // fail to check the network again.
-        await response.drain<List<int>>(<int>[]);
-        throw NetworkImageLoadException(
-            statusCode: response.statusCode, uri: resolved);
-      }
+      // Get bytes from cache or download
+      final Uint8List bytes =
+          await cacheService.cacheImageFromUrl(key.key, url);
 
-      final Uint8List bytes = await consolidateHttpClientResponseBytes(
-        response,
-        onBytesReceived: (int cumulative, int? total) {
-          chunkEvents.add(ImageChunkEvent(
-            cumulativeBytesLoaded: cumulative,
-            expectedTotalBytes: total,
-          ));
-        },
-      );
       if (bytes.lengthInBytes == 0) {
-        throw Exception('PictureKeyImage is an empty file: $resolved');
+        throw Exception('PictureKeyImage is an empty file: $url');
       }
 
       return decode(await ImmutableBuffer.fromUint8List(bytes));

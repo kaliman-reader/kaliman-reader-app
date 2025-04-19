@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kaliman_reader_app/services/image_cache_service.dart';
 import 'package:kaliman_reader_app/services/leading_image_selector.dart';
 
 class LeadingImage extends ImageProvider<LeadingImage> {
@@ -69,34 +70,19 @@ class LeadingImage extends ImageProvider<LeadingImage> {
       assert(key == this);
       var url =
           await LeadingImageSelector.getLeadingImage(isFinalFolder, key.key);
-      final Uri resolved = Uri.base.resolve(url);
 
-      final HttpClientRequest request = await _httpClient.getUrl(resolved);
+      // Initialize the cache service
+      final cacheService = ImageCacheService();
 
-      headers?.forEach((String name, String value) {
-        request.headers.add(name, value);
-      });
-      final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok) {
-        // The network may be only temporarily unavailable, or the file will be
-        // added on the server later. Avoid having future calls to resolve
-        // fail to check the network again.
-        await response.drain<List<int>>(<int>[]);
-        throw NetworkImageLoadException(
-            statusCode: response.statusCode, uri: resolved);
-      }
+      // We'll create a cache key that includes the folder information to avoid conflicts
+      final cacheKey = "${isFinalFolder ? 'final' : 'folder'}_${key.key}";
 
-      final Uint8List bytes = await consolidateHttpClientResponseBytes(
-        response,
-        onBytesReceived: (int cumulative, int? total) {
-          chunkEvents.add(ImageChunkEvent(
-            cumulativeBytesLoaded: cumulative,
-            expectedTotalBytes: total,
-          ));
-        },
-      );
+      // Get bytes from cache or download
+      final Uint8List bytes =
+          await cacheService.cacheImageFromUrl(cacheKey, url);
+
       if (bytes.lengthInBytes == 0) {
-        throw Exception('PictureKeyImage is an empty file: $resolved');
+        throw Exception('PictureKeyImage is an empty file: $url');
       }
 
       return decode(await ImmutableBuffer.fromUint8List(bytes));
