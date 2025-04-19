@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kaliman_reader_app/providers/leading_image.dart';
 import 'package:kaliman_reader_app/widgets/progress_icon.dart';
+import 'package:shimmer/shimmer.dart';
 
 typedef OnDownloadCallback = Future<void> Function(String prefix);
 
@@ -22,48 +23,87 @@ class Story extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image that takes full height
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Image(
-                width: 70,
-                height: 100,
-                image: ResizeImage(
-                  LeadingImage(
-                    prefix,
-                    isFinalFolder: isFinalFolder,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        // Use AspectRatio for the overall container to maintain consistent sizing
+        child: AspectRatio(
+          aspectRatio: 0.75, // Portrait orientation for comic covers
+          child: Column(
+            children: [
+              // Image takes most of the space
+              Expanded(
+                flex: 9,
+                child: Container(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  width: double.infinity,
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Image(
+                      image: LeadingImage(
+                        prefix,
+                        isFinalFolder: isFinalFolder,
+                      ),
+                      frameBuilder:
+                          (context, child, frame, wasSynchronouslyLoaded) {
+                        if (wasSynchronouslyLoaded || frame != null) {
+                          return child;
+                        }
+                        return Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 120,
+                            height: 170,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  width: 70,
-                  height: 100,
-                ),
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Title with flexible width
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-            ),
-            // Progress icon if needed
-            if (progress != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                child: ProgressIcon(progress: progress!),
+              // Icon and text area
+              Expanded(
+                flex: 3,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Progress icon if needed
+                      if (progress != null)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4.0),
+                          child: ProgressIcon(progress: progress!, size: 20),
+                        ),
+                      // Title with text centered
+                      Flexible(
+                        child: Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    height:
+                                        1, // Tighter line height to fit text better
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
