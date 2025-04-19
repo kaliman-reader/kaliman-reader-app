@@ -3,6 +3,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:kaliman_reader_app/models/prefix.dart';
 import 'package:kaliman_reader_app/pages/reader_page.dart';
+import 'package:kaliman_reader_app/utils/layout_utils.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:kaliman_reader_app/widgets/story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,7 +55,14 @@ class _SubFolderPageState extends State<SubFolderPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Capítulos"),
+        title: Text(
+          widget.prefix.prefix
+              .replaceAll(RegExp(r'/'), '')
+              .replaceAll(RegExp(r'A\.|K\.'), ''),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                height: 1.1, // Tighter line height to fit text better
+              ),
+        ),
       ),
       body: Stack(
         children: [
@@ -67,26 +75,38 @@ class _SubFolderPageState extends State<SubFolderPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 60),
-            child: ListView.builder(
-              itemCount: widget.prefixes.length,
-              itemBuilder: (context, index) {
-                final prefix = widget.prefixes[index].prefix;
-                return Story(
-                  title: prefix
-                      .replaceAllMapped(
-                          RegExp(r'\/(.*)\/'), (match) => ' (${match[1]})')
-                      .replaceAll(RegExp(r'A\.|K\.'), ''),
-                  onTap: () async {
-                    await goToReaderPage(context, prefix);
-                    setState(() {});
-                  },
-                  prefix: prefix,
-                  isFinalFolder: true,
-                  progress: _prefs?.getDouble(prefix),
-                );
-              },
-            ),
+            padding: const EdgeInsets.all(16.0),
+            child: LayoutBuilder(builder: (context, constraints) {
+              final double width = constraints.maxWidth;
+              final int crossAxisCount = getColumnCountForSubfolder(width);
+
+              return GridView.builder(
+                cacheExtent: MediaQuery.of(context).size.width * 2,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.75,
+                ),
+                padding: const EdgeInsets.only(bottom: 80),
+                itemCount: widget.prefixes.length,
+                itemBuilder: (context, index) {
+                  final prefix = widget.prefixes[index].prefix;
+                  return Story(
+                    title: prefix.replaceAllMapped(
+                        RegExp(r'(.*)\/(.*)(\.pdf)?\/'),
+                        (match) => '${match[2]}'),
+                    onTap: () async {
+                      await goToReaderPage(context, prefix);
+                      setState(() {});
+                    },
+                    prefix: prefix,
+                    isFinalFolder: true,
+                    progress: _prefs?.getDouble(prefix),
+                  );
+                },
+              );
+            }),
           ),
           const AdBanner(),
         ],
