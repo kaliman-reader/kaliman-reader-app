@@ -7,12 +7,16 @@ class LeadingImageSelector {
     String url;
     if (isFinalFolder) {
       var imagesKeys = await ObjectKeyRepository.getKeys(key);
-      url = (await ObjectRepository.getObject(imagesKeys.first.key)).url;
+      var thumbnailKey =
+          imagesKeys.firstWhere((e) => e.key.contains('thumbnail'));
+      url = (await ObjectRepository.getObject(thumbnailKey.key)).url;
     } else {
       var imagesPrefixes = await PrefixRepository.getPrefixes(key);
       var imagesKeys =
           await ObjectKeyRepository.getKeys(imagesPrefixes.first.prefix);
-      url = (await ObjectRepository.getObject(imagesKeys.first.key)).url;
+      var thumbnailKey =
+          imagesKeys.firstWhere((e) => e.key.contains('thumbnail'));
+      url = (await ObjectRepository.getObject(thumbnailKey.key)).url;
     }
     return url;
   }

@@ -88,6 +88,11 @@ class _ReaderPageState extends State<ReaderPage> {
 
   getObjectKeys() async {
     pictureKeys = await ObjectKeyRepository.getKeys(widget.prefix);
+    pictureKeys = pictureKeys
+        .where(
+          (e) => !e.key.contains('thumbnail'),
+        )
+        .toList();
     currentPictureUrl = pictureKeys[0].key;
     setLoading(false);
     final progress = _prefs.getDouble(widget.prefix);
