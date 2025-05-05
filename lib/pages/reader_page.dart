@@ -7,10 +7,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/models/picture_key.dart';
-import 'package:kaliman_reader_app/providers/picture_key_image.dart';
 import 'package:kaliman_reader_app/repositories/object_key_repository.dart';
 import 'package:kaliman_reader_app/services/image_download_service.dart';
 import 'package:kaliman_reader_app/services/image_share_service.dart';
+import 'package:kaliman_reader_app/utils/image_url.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -36,7 +36,7 @@ class _ReaderPageState extends State<ReaderPage> {
   InterstitialAd? _interstitialAd;
   final String adUnitId = dotenv.get('AD_INTERSTITIAL_UNIT_ID');
   static const platform =
-      MethodChannel('app.openlinks.kaliman_reader_app/buttons');
+      MethodChannel('app.openlinks.comic_reader_app/buttons');
   var pagesRead = 0;
 
   setLoading(bool loading) {
@@ -170,10 +170,15 @@ class _ReaderPageState extends State<ReaderPage> {
                   builder: (BuildContext context, int index) {
                     if (index + 1 < pictureKeys.length) {
                       precacheImage(
-                          PictureKeyImage(pictureKeys[index + 1].key), context);
+                        NetworkImage(
+                          getImageUrl(pictureKeys[index + 1].key),
+                        ),
+                        context,
+                      );
                     }
                     return PhotoViewGalleryPageOptions(
-                      imageProvider: PictureKeyImage(pictureKeys[index].key),
+                      imageProvider:
+                          NetworkImage(getImageUrl(pictureKeys[index].key)),
                       initialScale: PhotoViewComputedScale.contained,
                       onTapUp: (context, details, controllerValue) => setState(
                         () => _showAppBar = !_showAppBar,
