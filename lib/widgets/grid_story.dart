@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kaliman_reader_app/providers/leading_image.dart';
+import 'package:kaliman_reader_app/utils/image_url.dart';
 import 'package:shimmer/shimmer.dart';
 
 class GridStory extends StatelessWidget {
@@ -39,10 +39,7 @@ class GridStory extends StatelessWidget {
                   child: FittedBox(
                     fit: BoxFit.contain,
                     child: Image(
-                      image: LeadingImage(
-                        prefix,
-                        isFinalFolder: isFinalFolder,
-                      ),
+                      image: NetworkImage(getCoverUrl(prefix)),
                       frameBuilder:
                           (context, child, frame, wasSynchronouslyLoaded) {
                         if (wasSynchronouslyLoaded || frame != null) {

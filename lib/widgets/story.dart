@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kaliman_reader_app/providers/leading_image.dart';
+import 'package:kaliman_reader_app/utils/image_url.dart';
 import 'package:kaliman_reader_app/widgets/progress_icon.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -44,9 +44,8 @@ class Story extends StatelessWidget {
                   child: FittedBox(
                     fit: BoxFit.contain,
                     child: Image(
-                      image: LeadingImage(
-                        prefix,
-                        isFinalFolder: isFinalFolder,
+                      image: NetworkImage(
+                        getCoverUrl(prefix),
                       ),
                       frameBuilder:
                           (context, child, frame, wasSynchronouslyLoaded) {
