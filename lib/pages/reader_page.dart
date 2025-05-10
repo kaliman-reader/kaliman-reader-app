@@ -1,15 +1,19 @@
 import 'dart:developer';
 
+import 'package:confetti/confetti.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:kaliman_reader_app/common/constants.dart';
 import 'package:kaliman_reader_app/models/picture_key.dart';
 import 'package:kaliman_reader_app/repositories/object_key_repository.dart';
 import 'package:kaliman_reader_app/services/image_download_service.dart';
 import 'package:kaliman_reader_app/services/image_share_service.dart';
+import 'package:kaliman_reader_app/services/pdf_download_service.dart';
+import 'package:kaliman_reader_app/services/purchase_pdf_service.dart';
 import 'package:kaliman_reader_app/utils/image_url.dart';
 import 'package:kaliman_reader_app/widgets/ad_banner.dart';
 import 'package:photo_view/photo_view.dart';
@@ -38,6 +42,9 @@ class _ReaderPageState extends State<ReaderPage> {
   static const platform =
       MethodChannel('app.openlinks.comic_reader_app/buttons');
   var pagesRead = 0;
+  late ConfettiController _confettiController;
+  var downloadedPrefixes = <String>[];
+  bool _loadingPayment = false;
 
   setLoading(bool loading) {
     setState(() {
@@ -45,10 +52,56 @@ class _ReaderPageState extends State<ReaderPage> {
     });
   }
 
+  void _handlePurchases() async {
+    InAppPurchase.instance.restorePurchases();
+    InAppPurchase.instance.purchaseStream.listen((
+      List<PurchaseDetails> purchases,
+    ) async {
+      for (var purchaseDetails in purchases) {
+        log('${purchaseDetails.status}: ${purchaseDetails.productID}');
+        if (purchaseDetails.status == PurchaseStatus.canceled) {
+          setState(() {
+            _loadingPayment = false;
+          });
+        }
+        if (purchaseDetails.status == PurchaseStatus.purchased) {
+          var path = await PdfDownloadService.downloadPdf(widget.prefix);
+          var state = scaffoldMessengerKey.currentState;
+          _confettiController.play();
+          state?.showSnackBar(SnackBar(
+            content: Text('Página guardada en: $path'),
+          ));
+          setState(() {
+            _loadingPayment = false;
+            downloadedPrefixes.add(widget.prefix);
+            _prefs.setStringList(downloadedPrefixesKey, downloadedPrefixes);
+          });
+        }
+        if (purchaseDetails.status == PurchaseStatus.error) {
+          FirebaseAnalytics.instance.logEvent(
+            name: 'purchase_error',
+            parameters: {
+              'error': 'Purchase error',
+              'stack_trace': Error().stackTrace.toString(),
+              'prefix': widget.prefix
+            },
+          );
+          setState(() {
+            _loadingPayment = false;
+          });
+        }
+      }
+    });
+  }
+
   @override
   void initState() {
     getObjectKeys();
     _loadAd();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
+    _handlePurchases();
     FirebaseAnalytics.instance.logScreenView(
       screenName: 'reader_page',
       screenClass: 'ReaderPage',
@@ -56,6 +109,7 @@ class _ReaderPageState extends State<ReaderPage> {
     );
     SharedPreferences.getInstance().then((prefs) {
       _prefs = prefs;
+      downloadedPrefixes = _prefs.getStringList(downloadedPrefixesKey) ?? [];
       getObjectKeys();
     });
 
@@ -113,6 +167,7 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -139,6 +194,12 @@ class _ReaderPageState extends State<ReaderPage> {
                     setState(() {
                       downloadIcon = Icons.download_done;
                     });
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.picture_as_pdf),
+                  onPressed: () {
+                    _showPdfDownloadDialog();
                   },
                 ),
                 IconButton(
@@ -227,7 +288,31 @@ class _ReaderPageState extends State<ReaderPage> {
                 ),
               ),
               const AdBanner(),
-            ])
+            ]),
+            Center(
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality: BlastDirectionality.directional,
+                blastDirection: -3.14 / 2, // equivalent to -pi / 2
+                emissionFrequency: 0.2,
+                numberOfParticles: 20,
+                gravity: 0.3,
+              ),
+            ),
+            if (_loadingPayment)
+              Container(
+                color: Colors.black
+                    .withValues(alpha: 0.5), // Semi-transparent black backdrop
+                child: const Center(
+                  child: Text(
+                    'Adquiriendo cómic...',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -296,6 +381,37 @@ class _ReaderPageState extends State<ReaderPage> {
         },
       ),
       request: const AdRequest(),
+    );
+  }
+
+  void _showPdfDownloadDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Descargar Cómic Completo en PDF'),
+          content: const Text(
+              'Obtén el cómic completo en formato PDF de alta calidad en español. \n\n¿Deseas continuar con la descarga?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                setState(() {
+                  _loadingPayment = true;
+                });
+                await PurchasePdfService.buyPdf(widget.prefix);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

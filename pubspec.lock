@@ -324,18 +324,18 @@ packages:
     dependency: "direct main"
     description:
       name: in_app_purchase
-      sha256: "960f26a08d9351fb8f89f08901f8a829d41b04d45a694b8f776121d9e41dcad6"
+      sha256: "11a40f148eeb4f681a0572003e2b33432e110c90c1bbb4f9ef83b81ec0c4f737"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.0"
+    version: "3.2.1"
   in_app_purchase_android:
     dependency: transitive
     description:
       name: in_app_purchase_android
-      sha256: "6bbb526f2a405d9fe6556bb33e63fbeaff13fde3e42207b19aa5300eca9a1de6"
+      sha256: "475b6c6541b54e6878263270d291ca8d5d7ef044263115bdec45e1e59737e3ad"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.6+10"
+    version: "0.4.0+1"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
@@ -991,4 +991,4 @@ packages:
     version: "3.1.2"
 sdks:
   dart: ">=3.7.0-0 <4.0.0"
-  flutter: ">=3.24.0"
+  flutter: ">=3.27.0"
